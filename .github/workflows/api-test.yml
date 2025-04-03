@@ -1,0 +1,45 @@
+name: API Test Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  
+
+      - name: Install dependencies
+        run: npm install -g newman dotenv-cli
+
+      - name: Set access token as environment variable
+        run: echo "ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Create test reports directory
+        run: mkdir -p test_reports
+
+      - name: Run API tests with Newman
+        run: |
+          newman run ./postman/Techies-match.postman_collection.json \
+            -e ./postman/env_postman_environment.json \
+            --env-var "accessToken=$ACCESS_TOKEN" \
+            --reporters cli,html,json \
+            --reporter-json-export test_reports/newman-report.json \
+            --reporter-html-export test_reports/newman-report.html
+
+      - name: Upload test reports as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: newman-reports
+          path: test_reports/
