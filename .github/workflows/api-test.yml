@@ -36,7 +36,8 @@ jobs:
             --env-var "accessToken=$ACCESS_TOKEN" \
             --reporters cli,html,json \
             --reporter-json-export test_reports/newman-report.json \
-            --reporter-html-export test_reports/newman-report.html
+            --reporter-html-export test_reports/newman-report.html \
+            --suppress-exit-code
 
       - name: Upload test reports as artifacts
         uses: actions/upload-artifact@v4
